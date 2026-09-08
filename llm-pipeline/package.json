@@ -1,0 +1,12 @@
+{
+    "name": "llm-job-analyzer",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Runs scraped LinkedIn job postings through a self-hosted Ollama LLM to produce structured market-analysis JSON.",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "start": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/main.js"
+    }
+}

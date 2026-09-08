@@ -1,0 +1,17 @@
+{
+    "name": "linkedin-jobs-scraper",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Apify Actor that scrapes LinkedIn's public job search results.",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "apify": "^3.2.6",
+        "crawlee": "^3.11.5"
+    },
+    "scripts": {
+        "start": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/main.js",
+        "test": "echo \"no tests\" && exit 0"
+    }
+}

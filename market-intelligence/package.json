@@ -1,0 +1,22 @@
+{
+    "name": "market-intelligence",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Ingests analyzed LinkedIn job JSON into PostgreSQL, computes daily market metrics/trends, and exposes a dashboard REST API.",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "pg": "^8.13.1"
+    },
+    "scripts": {
+        "dev": "node --watch --env-file-if-exists=../.env --env-file-if-exists=.env src/app.js",
+        "start": "node --env-file-if-exists=../.env --env-file-if-exists=.env src/app.js",
+        "db:setup": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/setupDatabase.js",
+        "ingest": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/ingest.js",
+        "aggregate": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/aggregate.js",
+        "trends": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/trends.js",
+        "daily": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/runDaily.js"
+    }
+}

@@ -1,0 +1,112 @@
+{
+    "title": "LinkedIn Job Search Scraper",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "keywords": {
+            "title": "Keywords",
+            "type": "string",
+            "description": "Job title, skill, or company to search for (maps to LinkedIn's search query). Supports boolean OR / quoted phrases.",
+            "editor": "textfield",
+            "prefill": "\"AI Engineer\" OR \"Applied AI Engineer\" OR \"Software Engineer, AI\" OR \"Machine Learning Engineer\" OR \"Artificial Intelligence Engineer\""
+        },
+        "location": {
+            "title": "Location",
+            "type": "string",
+            "description": "Geographic location, e.g. \"United States\", \"London, England, United Kingdom\", \"Remote\".",
+            "editor": "textfield",
+            "prefill": "Hyderabad, Telangana, India"
+        },
+        "maxItems": {
+            "title": "Max jobs to scrape",
+            "type": "integer",
+            "description": "Stop after this many job listings have been collected.",
+            "default": 1000,
+            "minimum": 1
+        },
+        "datePosted": {
+            "title": "Date posted",
+            "type": "string",
+            "description": "Filter by how recently the job was posted.",
+            "editor": "select",
+            "enum": ["any", "past24Hours", "pastWeek", "pastMonth"],
+            "enumTitles": ["Any time", "Past 24 hours", "Past week", "Past month"],
+            "default": "past24Hours"
+        },
+        "experienceLevels": {
+            "title": "Experience level",
+            "type": "array",
+            "description": "Filter by seniority level. Leave empty for all levels.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["internship", "entryLevel", "associate", "midSeniorLevel", "director", "executive"],
+                "enumTitles": ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
+            },
+            "default": ["internship", "entryLevel", "associate"]
+        },
+        "jobTypes": {
+            "title": "Job type",
+            "type": "array",
+            "description": "Filter by employment type. Leave empty for all types.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["fullTime", "partTime", "contract", "temporary", "volunteer", "internship", "other"],
+                "enumTitles": ["Full-time", "Part-time", "Contract", "Temporary", "Volunteer", "Internship", "Other"]
+            },
+            "default": []
+        },
+        "remoteFilter": {
+            "title": "Workplace type",
+            "type": "array",
+            "description": "Filter by on-site / remote / hybrid. Leave empty for all.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["onSite", "remote", "hybrid"],
+                "enumTitles": ["On-site", "Remote", "Hybrid"]
+            },
+            "default": []
+        },
+        "titleKeywordFilter": {
+            "title": "Title synonym filter",
+            "type": "array",
+            "description": "After scraping, keep only jobs whose title contains one of these terms (whole-word, case-insensitive) — lets a broad search catch AI-related titles under any naming. Leave empty to disable and keep every result from the search.",
+            "editor": "stringList",
+            "items": {
+                "type": "string"
+            },
+            "default": [
+                "ai",
+                "artificial intelligence",
+                "machine learning",
+                "ml",
+                "deep learning",
+                "llm",
+                "nlp",
+                "natural language processing",
+                "generative ai",
+                "genai",
+                "computer vision"
+            ]
+        },
+        "fetchFullDescription": {
+            "title": "Fetch full job description",
+            "type": "boolean",
+            "description": "If enabled, visits each job's detail page to collect the full description and extra fields. Roughly doubles the number of requests.",
+            "default": true
+        },
+        "proxyConfiguration": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "description": "LinkedIn aggressively rate-limits and blocks datacenter IPs. Residential proxies are strongly recommended.",
+            "editor": "proxy",
+            "default": {
+                "useApifyProxy": true,
+                "apifyProxyGroups": ["RESIDENTIAL"]
+            }
+        }
+    },
+    "required": ["keywords"]
+}
