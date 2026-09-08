@@ -1,6 +1,10 @@
 // Ordered regex -> canonical label rules. First match wins. Extensible —
 // add new rules above the fallback as new phrasing patterns show up.
-const CAPABILITY_RULES = [
+// Exported (only this line changed) so the read-only normalization resolver
+// (src/normalization/) can tell "a rule matched" apart from "no rule matched,
+// text used as its own canonical" without duplicating this array elsewhere -
+// normalizeCapability()'s own behavior below is completely unchanged.
+export const CAPABILITY_RULES = [
     { pattern: /\brag\b|retrieval.augmented|retrieval pipeline/i, canonical: 'Build RAG Systems' },
     { pattern: /\bagents?\b.*\b(build|design|develop)\b|\b(build|design|develop)\b.*\bagents?\b/i, canonical: 'Build AI Agents' },
     { pattern: /multi-agent|multi agent/i, canonical: 'Design Multi-Agent Systems' },

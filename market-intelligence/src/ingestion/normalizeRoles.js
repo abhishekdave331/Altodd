@@ -19,6 +19,23 @@ export function normalizeRole(rawRole) {
     return ROLE_ALIASES[toKey(trimmed)] ?? trimmed;
 }
 
+// Upserts the already-normalizeRole()-cleaned name as a canonical roles row.
+// Mirrors upsertCapability's exact shape (not upsertSkill's) - like
+// capabilities, roles has no extra mutable column beyond name/normalized_name,
+// so the no-op "DO UPDATE SET normalized_name = EXCLUDED.normalized_name" is
+// only there to make RETURNING yield a row on conflict too.
+export async function upsertRole(client, name) {
+    const normalizedName = toKey(name);
+    const result = await client.query(
+        `INSERT INTO roles (name, normalized_name)
+         VALUES ($1, $2)
+         ON CONFLICT (normalized_name) DO UPDATE SET normalized_name = EXCLUDED.normalized_name
+         RETURNING id`,
+        [name, normalizedName],
+    );
+    return result.rows[0].id;
+}
+
 // Real seniority_inferred values are inconsistently formatted across files
 // ("Mid-Senior level", "Mid-Senior", "Entry level", "Senior", "Junior").
 // The market-health formula needs to match these against canonical buckets,

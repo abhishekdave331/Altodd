@@ -13,8 +13,32 @@ import {
     parseLocation,
 } from './validateAnalysis.js';
 import { flattenJobSkills, assignPriority, upsertSkill } from './normalizeSkills.js';
-import { normalizeRole, normalizeSeniority } from './normalizeRoles.js';
+import { normalizeRole, normalizeSeniority, upsertRole } from './normalizeRoles.js';
 import { upsertCapability } from './normalizeCapabilities.js';
+import { resolveTaxonomyValue } from '../normalization/resolveTaxonomyValue.js';
+import { recordForReview } from '../normalization/reviewQueue.js';
+
+// Evaluated BEFORE the corresponding upsertSkill/upsertCapability call, on
+// the same transactional client, so "has this value ever been seen before"
+// reflects true prior state - upsertSkill/upsertCapability always succeed by
+// design (falling back to the raw text as its own canonical), so calling the
+// resolver afterward would find its own just-created row and never queue
+// anything. This is a read-only governance side-channel: its outcome never
+// changes what upsertSkill/upsertCapability do, so existing ingestion
+// behavior is fully preserved regardless of what happens here.
+async function queueIfUnresolved(client, dimension, rawValue, jobId) {
+    try {
+        const resolution = await resolveTaxonomyValue({ dimension, rawValue, db: client });
+        if (resolution.requiresReview) {
+            await recordForReview({ resolution, db: client, jobId });
+        }
+    } catch (err) {
+        // Never let a review-queue evaluation failure abort ingestion of the
+        // job/skill/capability data itself - logged (not silently swallowed)
+        // so a genuine bug is still visible, but not rethrown.
+        console.error(`[review-queue] Failed to evaluate "${rawValue}" (${dimension}) for job ${jobId}: ${err.message}`);
+    }
+}
 
 async function upsertJob(client, jobMetadata) {
     const { location, city, state, country } = parseLocation(jobMetadata);
@@ -68,6 +92,7 @@ async function upsertJobAnalysis(client, jobId, analysis) {
 async function upsertJobSkills(client, jobId, skillsObj, skillPriority) {
     const flattened = assignPriority(flattenJobSkills(skillsObj), skillPriority);
     for (const skill of flattened) {
+        await queueIfUnresolved(client, 'skill', skill.name, jobId);
         const skillId = await upsertSkill(client, skill.name, skill.normalized_name, skill.category);
         await client.query(
             `INSERT INTO job_skills (job_id, skill_id, category, priority)
@@ -84,6 +109,7 @@ async function upsertJobCapabilities(client, jobId, capabilities) {
     if (!Array.isArray(capabilities)) return;
     for (const rawText of capabilities) {
         if (!rawText || typeof rawText !== 'string') continue;
+        await queueIfUnresolved(client, 'capability', rawText, jobId);
         const capabilityId = await upsertCapability(client, rawText);
         await client.query(
             `INSERT INTO job_capabilities (job_id, capability_id)
@@ -108,6 +134,18 @@ async function upsertJobRoles(client, jobId, roleAnalysis) {
         experience.maximum_years,
         experience.preferred_years,
     );
+
+    // Only actual_role feeds the canonical roles taxonomy - see Task 5.12
+    // report for why: it's the LLM's "true role" classification (populated
+    // for ~90% of jobs), whereas advertised_role is sparse (~14%) and closer
+    // to a title-inflation signal than a second parallel role concept.
+    // job_roles.advertised_role/actual_role themselves are untouched - this
+    // only adds a canonical roles row alongside them, same non-blocking
+    // resolve-then-upsert ordering already established for skills/capabilities.
+    if (actualRole) {
+        await queueIfUnresolved(client, 'role', actualRole, jobId);
+        await upsertRole(client, actualRole);
+    }
 
     await client.query(
         `INSERT INTO job_roles (job_id, advertised_role, actual_role, seniority, minimum_experience, maximum_experience)
