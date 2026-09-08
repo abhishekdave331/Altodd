@@ -22,7 +22,7 @@ export default async function Home() {
     return (
         <main className="mx-auto max-w-5xl w-full px-6 py-10 flex flex-col gap-8">
             <header className="flex flex-col gap-1">
-                <h1 className="text-2xl font-semibold text-text-primary">Vektor Market Intelligence</h1>
+                <h1 className="text-2xl font-semibold text-text-primary">Altodd Market Intelligence</h1>
                 <p className="text-sm text-text-secondary">
                     AI/ML job market snapshot for {overview.date ?? 'today'}
                 </p>

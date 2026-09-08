@@ -1,6 +1,8 @@
-# Vektor — AI Job Market Intelligence Platform
+# Altodd — AI Job Market Intelligence Platform
 
 Scrapes AI/ML job postings from LinkedIn, analyzes each one with a self-hosted LLM, stores the results in PostgreSQL with daily market-snapshot aggregation, and serves it all through a dashboard. Runs on a daily automated schedule.
+
+> **Note**: the project was renamed from "Vektor" to "Altodd" — all code, docs, the database name, and the scheduled task now say Altodd, but the folder on disk is still physically named `Vektor` (a running terminal session had it open as its working directory, and Windows won't allow renaming a folder that's in use). `scripts/run-daily-pipeline.ps1` and the scheduled task both correctly point at the real `...\Documents\Vektor\...` path — rename the folder yourself whenever convenient (close all terminals/Explorer windows pointed at it first), then update the `$root` path at the top of `scripts/run-daily-pipeline.ps1` to match.
 
 ## Architecture
 
@@ -86,11 +88,11 @@ npm run dev                   # dashboard on :3000
 
 ## Daily automation
 
-`scripts/run-daily-pipeline.ps1` chains scrape → LLM analysis → ingest/aggregate, with logging to `logs/pipeline-<timestamp>.log`. It's registered as a Windows Scheduled Task (`Vektor Daily Pipeline`, daily at 6:00 AM, "Interactive only" logon mode — runs once you're logged into Windows, including from a locked screen; starts as soon as possible if a run was missed, and runs on battery power too).
+`scripts/run-daily-pipeline.ps1` chains scrape → LLM analysis → ingest/aggregate, with logging to `logs/pipeline-<timestamp>.log`. It's registered as a Windows Scheduled Task (`Altodd Daily Pipeline`, daily at 6:00 AM, "Interactive only" logon mode — runs once you're logged into Windows, including from a locked screen; starts as soon as possible if a run was missed, and runs on battery power too).
 
 Check it with:
 ```powershell
-schtasks /Query /TN "Vektor Daily Pipeline" /V /FO LIST
+schtasks /Query /TN "Altodd Daily Pipeline" /V /FO LIST
 ```
 
 The dashboard/API don't need restarting after a daily run — they read Postgres live on every request.

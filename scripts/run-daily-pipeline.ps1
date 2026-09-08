@@ -1,10 +1,10 @@
-# Vektor daily pipeline: scrape -> LLM analyze -> ingest/aggregate.
+# Altodd daily pipeline: scrape -> LLM analyze -> ingest/aggregate.
 # Registered as a Windows Scheduled Task to run at 06:00 daily.
 # The dashboard/API don't need restarting afterward - they read Postgres live.
 
 $ErrorActionPreference = 'Stop'
 
-$root = "C:\Users\abhis\Documents\Vektor"
+$root = "C:\Users\abhis\Documents\Vektor" # physical folder not yet renamed — see README
 $actorId = "WoIkcryaPU8xUSqP0"
 $actorInput = "storage\key_value_stores\default\INPUT.json"
 $ollamaExe = "C:\Users\abhis\AppData\Local\Programs\Ollama\ollama.exe"
@@ -65,7 +65,7 @@ function Ensure-Ollama {
 }
 
 try {
-    Log "=== Vektor daily pipeline starting ==="
+    Log "=== Altodd daily pipeline starting ==="
 
     Log "Step 1/3: Running LinkedIn scraper Actor on Apify..."
     Set-Location (Join-Path $root "linkedin-jobs-scraper")
@@ -90,7 +90,7 @@ try {
         throw "market-intelligence daily pipeline failed (exit code $exitCode)."
     }
 
-    Log "=== Vektor daily pipeline finished successfully ==="
+    Log "=== Altodd daily pipeline finished successfully ==="
 } catch {
     Log "PIPELINE FAILED: $($_.Exception.Message)"
     exit 1

@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Vektor — Market Intelligence",
+  title: "Altodd — Market Intelligence",
   description: "AI/ML job market intelligence dashboard",
 };
 
