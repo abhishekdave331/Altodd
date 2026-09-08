@@ -7,7 +7,6 @@ $ErrorActionPreference = 'Stop'
 $root = "C:\Users\abhis\Documents\Vektor" # physical folder not yet renamed — see README
 $actorId = "WoIkcryaPU8xUSqP0"
 $actorInput = "storage\key_value_stores\default\INPUT.json"
-$ollamaExe = "C:\Users\abhis\AppData\Local\Programs\Ollama\ollama.exe"
 
 $logDir = Join-Path $root "logs"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
@@ -41,29 +40,6 @@ function Invoke-Logged($scriptBlock) {
     return $LASTEXITCODE
 }
 
-function Ensure-Ollama {
-    try {
-        Invoke-WebRequest -Uri "http://localhost:11434/api/tags" -UseBasicParsing -TimeoutSec 5 | Out-Null
-        Log "Ollama already running."
-        return
-    } catch {
-        Log "Ollama not responding, starting it..."
-    }
-
-    Start-Process -FilePath $ollamaExe -ArgumentList "serve" -WindowStyle Hidden
-
-    $deadline = (Get-Date).AddSeconds(30)
-    while ((Get-Date) -lt $deadline) {
-        Start-Sleep -Seconds 2
-        try {
-            Invoke-WebRequest -Uri "http://localhost:11434/api/tags" -UseBasicParsing -TimeoutSec 5 | Out-Null
-            Log "Ollama is now responding."
-            return
-        } catch {}
-    }
-    throw "Ollama did not become ready within 30 seconds."
-}
-
 try {
     Log "=== Altodd daily pipeline starting ==="
 
@@ -75,8 +51,7 @@ try {
     }
     Log "Scraper run complete."
 
-    Log "Step 2/3: Analyzing jobs with local LLM (Ollama)..."
-    Ensure-Ollama
+    Log "Step 2/3: Analyzing jobs with Groq..."
     Set-Location (Join-Path $root "llm-pipeline")
     $exitCode = Invoke-Logged { npm start }
     if ($exitCode -ne 0) {

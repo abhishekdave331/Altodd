@@ -1,0 +1,17 @@
+{
+    "name": "profile-enrichment",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Extracts structured user profile data from an uploaded resume using a self-hosted LLM, for future personalized job-search scraper orchestration.",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "pdf-parse": "^1.1.1",
+        "pg": "^8.13.1"
+    },
+    "scripts": {
+        "process-resume": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/processResume.js",
+        "generate-search-config": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/generateSearchConfig.js"
+    }
+}

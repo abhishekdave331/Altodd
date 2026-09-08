@@ -1,22 +1,29 @@
 import { getTotalJobCount } from './dailyMetrics.js';
 
+// Task 6.8: pool is always the transaction client runAggregationOnly opens
+// around all 7 aggregation calls - no internal transaction here anymore
+// (see skillMetrics.js's comment for why an internal withTransaction()
+// wouldn't have participated in that outer one anyway).
 export async function computeDailyIndustryMetrics(pool, metricDate) {
-    const totalJobs = await getTotalJobCount(pool);
+    const totalJobs = await getTotalJobCount(pool, metricDate);
 
+    // Task 6.7: bounded by metricDate - see dailyMetrics.js's
+    // getTotalJobCount comment for the proven defect this prevents.
     const result = await pool.query(`
         SELECT industry, COUNT(*)::int AS job_count
         FROM jobs
-        WHERE industry IS NOT NULL
+        WHERE industry IS NOT NULL AND first_seen_at < ($1::date + 1)
         GROUP BY industry
-    `);
+    `, [metricDate]);
 
+    // Task 6.7: delete-then-insert (not per-row upsert) - see
+    // skillMetrics.js's comment for the proven stale-row defect this fixes.
+    await pool.query('DELETE FROM daily_industry_metrics WHERE metric_date = $1', [metricDate]);
     for (const row of result.rows) {
         const demandPercentage = totalJobs > 0 ? (row.job_count / totalJobs) * 100 : 0;
         await pool.query(
             `INSERT INTO daily_industry_metrics (metric_date, industry, job_count, demand_percentage)
-             VALUES ($1,$2,$3,$4)
-             ON CONFLICT (metric_date, industry) DO UPDATE SET
-               job_count=EXCLUDED.job_count, demand_percentage=EXCLUDED.demand_percentage`,
+             VALUES ($1,$2,$3,$4)`,
             [metricDate, row.industry, row.job_count, demandPercentage],
         );
     }

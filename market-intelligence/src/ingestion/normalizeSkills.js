@@ -28,6 +28,14 @@ export const SKILL_ALIASES = {
     'ci/cd': 'CI/CD',
     'ci/cd pipeline': 'CI/CD',
     cicd: 'CI/CD',
+
+    // Task 6.6: found via live dashboard audit - "LLM" and "LLMs" were
+    // ranking as two separate top-skills entries (6 and 9 jobs
+    // respectively) purely because plural "s" isn't stripped by
+    // toNormalizedKey(). See migration 011 for the one-time retroactive
+    // merge of the two skills rows this alias would otherwise have left
+    // permanently split for jobs already ingested before this fix existed.
+    llms: 'LLM',
 };
 
 function toNormalizedKey(name) {

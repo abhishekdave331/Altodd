@@ -1,5 +1,7 @@
 import express from 'express';
 import { dashboardRoutes } from './routes/dashboardRoutes.js';
+import { pipelineRoutes } from './routes/pipelineRoutes.js';
+import { profileRoutes } from './routes/profileRoutes.js';
 
 const app = express();
 
@@ -8,6 +10,8 @@ app.use(express.json());
 app.get('/healthz', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/pipeline-runs', pipelineRoutes);
+app.use('/api/profiles', profileRoutes);
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });

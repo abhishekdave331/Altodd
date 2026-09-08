@@ -1,0 +1,15 @@
+{
+    "name": "scraper-orchestration",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Reads a personalized search_configuration (Task 7.2) and converts it into dynamic Apify actor runs against the existing linkedin-jobs-scraper actor - no static INPUT.json.",
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "dependencies": {
+        "pg": "^8.13.1"
+    },
+    "scripts": {
+        "orchestrate": "node --env-file-if-exists=../.env --env-file-if-exists=.env scripts/runOrchestration.js"
+    }
+}
